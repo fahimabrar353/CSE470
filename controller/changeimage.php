@@ -9,22 +9,11 @@ if (strlen($_SESSION['remsuid']==0)) {
 
 if(isset($_POST['submit']))
   {
-$uid=$_SESSION['remsuid'];
+$cid=$_GET['editid'];
 
-$uservarification=1;
-
-$protitle=$_POST['propertytitle'];
-$prodec=$_POST['propertydescription'];
-
-
-$proid=mt_rand(100000000, 999999999);
-//NID Image
-$pic=$_FILES["nidimage1"]["name"];
+//fetured Image
+$pic=$_FILES["featuredimage"]["name"];
 $extension = substr($pic,strlen($pic)-4,strlen($pic));
-//NID Image 1
-$pic1=$_FILES["nidimage2"]["name"];
-$extension1 = substr($pic1,strlen($pic1)-4,strlen($pic1));
-
 
 // allowed extensions
 $allowed_extensions = array(".jpg","jpeg",".png",".gif");
@@ -33,39 +22,28 @@ if(!in_array($extension,$allowed_extensions))
 {
 echo "<script>alert('Featured image has Invalid format. Only jpg / jpeg/ png /gif format allowed');</script>";
 }
-if(!in_array($extension1,$allowed_extensions))
-{
-echo "<script>alert('Property gallery image1 has Invalid format. Only jpg / jpeg/ png /gif format allowed');</script>";
-}
-
 
 else
 {
 //rename property images
 $propic=md5($pic).time().$extension;
-$propic1=md5($pic1).time().$extension1;
 
-     move_uploaded_file($_FILES["nidimage1"]["tmp_name"],"creds/".$propic);
-     move_uploaded_file($_FILES["nidimage2"]["tmp_name"],"creds/".$propic1);
-     
+     move_uploaded_file($_FILES["featuredimage"]["tmp_name"],"propertyimages/".$propic);
+   
 
-    $query=mysqli_query($con,"insert into tblnid(uid,idpic1,idpic2,uservarified)value('$uid','$propic','$propic1','$uservarification')");
-   if ($query) {
-    echo '<script>alert("ID detail has been added.")</script>';
-echo "<script>window.location.href ='user-profile.php'</script>";
+    $query=mysqli_query($con,"update tblproperty set FeaturedImage='$propic' where ID='$cid'");
+  
+    if ($query) {
+    $msg="Property Image has been updated.";
   }
   else
     {
-         echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      $msg="Something Went Wrong. Please try again";
     }
 
-  
-}
-}
-
-
-
-?>
+  }
+ }
+  ?>
 
  <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
@@ -79,42 +57,14 @@ echo "<script>window.location.href ='user-profile.php'</script>";
     ============================================= -->
     <link href="assets/css/external.css" rel="stylesheet">
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/css/style.css?tolet=v56" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
    
-    <title>ETo-Let || Varification</title>
+    <title> ETo-Let || Update Image</title>
 </head>
-<script>
-function getsate(val) {
-  $.ajax({
-type:"POST",
-url:"get-sate.php",
-data:'$countryid='+val,
-success:function(data){
-$("#state").html(data);
-}
-
-  });
-}
-</script>
-
-<script>
-function getcity(val1) {
-  $.ajax({
-type:"POST",
-url:"get-sate.php",
-data:'$stateid='+val1,
-success:function(data){
-$("#city").html(data);
-}
-
-  });
-}
-</script>
-
 
 <body>
     <!-- Document Wrapper
-	============================================= -->
+    ============================================= -->
     <div id="wrapper" class="wrapper clearfix">
         <?php include_once('includes/header.php');?>
         
@@ -122,7 +72,7 @@ $("#city").html(data);
 ============================================ -->
         <section id="page-title" class="page-title bg-overlay bg-overlay-dark2">
             <div class="bg-section">
-                <img src="assets/images/page-titles/3.jpg" alt="Background" />
+                <img src="assets/images/page-titles/1.jpg" alt="Background" />
             </div>
             <div class="container">
                 <div class="row">
@@ -130,11 +80,11 @@ $("#city").html(data);
                         <div class="title title-1 text-center">
                             <div class="title--content">
                                 <div class="title--heading">
-                                    <h1>Account Varification</h1>
+                                    <h1>Add Property</h1>
                                 </div>
                                 <ol class="breadcrumb">
                                     <li><a href="#">Home</a></li>
-                                    <li class="active">Varification</li>
+                                    <li class="active">Update Image</li>
                                 </ol>
                             </div>
                             <div class="clearfix"></div>
@@ -145,85 +95,72 @@ $("#city").html(data);
                 </div>
                 <!-- .row end -->
             </div>
-           
+            <!-- .container end -->
         </section>
         <!-- #page-title end -->
 
         <!-- #Add Property
 ============================================= -->
-
         <section id="add-property" class="add-property">
-            
             <div class="container">
-
                 <div class="row">
-
                     <div class="col-xs-12 col-sm-12 col-md-12">
 
                         <form class="mb-0" method="post"  enctype="multipart/form-data">
                             <p style="font-size:16px; color:red" align="center"> <?php if($msg){
     echo $msg;
   }  ?> </p>
+  <?php
+ $eid=$_GET['editid'];
+$ret=mysqli_query($con,"select * from tblproperty where ID='$eid'");
+$cnt=1;
+while ($row=mysqli_fetch_array($ret)) {
+
+?>
                             <div class="form-box">
                                 <div class="row">
                                     <div class="col-xs-12 col-sm-12 col-md-12">
-                                        <h4 class="form--title">NID Varification Consent Area</h4>
+                                        <h4 class="form--title">Property Description</h4>
                                     </div>
-                                    <p> The varification description goes here </p>
-                          
-                         
-                              
-                                    
+                                     <div class="col-xs-12 col-sm-12 col-md-12">
+                                        <div class="form-group">
+                                            <label for="property-title">Property Title*</label>
+                                           <input type="text" class="form-control" name="propertytitle" id="propertytitle" required='true' value="<?php  echo $row['PropertyTitle'];?>">
+                                        </div>
+                                    </div>
+   
                                 </div>
                                 <!-- .row end -->
                             </div>
-                            
+                           
+
                             <div class="form-box">
                                 <div class="row">
                                     <div class="col-xs-12 col-sm-12 col-md-12">
-                                        <h4 class="form--title">Upload Picture Area</h4>
+                                        <h4 class="form--title">Property Gallery</h4>
                                     </div>
                                     <!-- .col-md-12 end -->
                                     <div class="col-xs-4 col-sm-4 col-md-4">
                                         <div class="form-group">
-                                            <label for="address">Front Side Image</label>
-                                            <input type="file" class="form-control" name="nidimage1" required>
+                                            <label for="address">Featured Image</label>
+                                            <img src="propertyimages/<?php echo $row['FeaturedImage'];?>" width="200" height="150">
                                         </div>
                                     </div>
-                                      <div class="col-xs-4 col-sm-4 col-md-4">
+                                    <div class="col-xs-4 col-sm-4 col-md-4">
                                         <div class="form-group">
-                                            <label for="address">Backside Image</label>
-                                            <input type="file" class="form-control" name="nidimage2" required>
+                                            <label for="address">New Featured Image</label>
+                                            <input type="file" class="form-control" name="featuredimage" required='true'>
                                         </div>
                                     </div>
-                                      
-                                     
-                                    
-                                  
+                                   
+                                   
+                                    <!-- .col-md-12 end -->
 
                                 </div>
                                 <!-- .row end -->
                             </div>
-                            <!-- .form-box end -->
-
-                                 <?php  
-                                  $uid=$_SESSION['remsuid'];
-                                    $query=mysqli_query($con,"select * from tblnid where uid='$uid'");
-                                    $num=mysqli_num_rows($query);
-                                    if($num>0){
-                                        $msg="Already Submitted";
-                                        echo $msg;
-
-                                    }
-                                    else{
-                                   
-
-
-                                 ?>
-                            <!-- .form-box end -->
-                            <input type="submit" value="Submit" name="submit" class="btn btn--primary">
-
-                            <?php } ?>
+                   <?php } ?>
+                            <input type="submit" value="Save Edits" name="submit" class="btn btn--primary">
                         </form>
                     </div>
                     <!-- .col-md-12 end -->
